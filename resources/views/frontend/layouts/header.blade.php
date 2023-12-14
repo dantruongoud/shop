@@ -34,7 +34,7 @@
             <div class="row">
                 <div class="col-md-4 clearfix">
                     <div class="logo pull-left">
-                        <a href="{{ url('/frontend/index') }}"><img src="{{ asset('frontend/images/home/logo.png') }}"
+                        <a href="{{ url('/index') }}"><img src="{{ asset('frontend/images/home/logo.png') }}"
                                 alt="" /></a>
                     </div>
                     <div class="btn-group pull-right clearfix">
@@ -66,17 +66,18 @@
                         <ul class="nav navbar-nav">
                             <li>
                                 @if (Auth::check())
-                                <a href="{{ url('frontend/account/my-account') }}"><i class="fa fa-user"></i>
+                                <a href="{{ url('/account/my-account') }}"><i class="fa fa-user"></i>
                                     Account</a>
                                 @endif
                             </li>
 
                             <li><a href=""><i class="fa fa-star"></i> Wishlist</a></li>
-                            <li><a href="checkout.html"><i class="fa fa-crosshairs"></i> Checkout</a></li>
+                            <li><a href="{{ url('frontend/check-out') }}"><i class="fa fa-crosshairs"></i> Checkout</a></li>
 
                             <li>
-                                <a href="cart.html">
-                                    <i class="fa fa-shopping-cart"></i> Cart
+                                <a id="sum_qty" href="{{ url('/cart') }}">
+                                    <i class="fa fa-shopping-cart"></i> 
+                                    Cart
                                 </a>
                             </li>
                             <li>
@@ -116,10 +117,10 @@
                     </div>
                     <div class="mainmenu pull-left">
                         <ul class="nav navbar-nav collapse navbar-collapse">
-                            <li><a href="index.html" class="active">Home</a></li>
+                            <li><a href="{{ url('/index') }}" class="active">Home</a></li>
                             <li class="dropdown"><a href="#">Shop<i class="fa fa-angle-down"></i></a>
                                 <ul role="menu" class="sub-menu">
-                                    <li><a href="shop.html">Products</a></li>
+                                    <li><a href="{{ url('/shop/product') }}">Products</a></li>
                                     <li><a href="product-details.html">Product Details</a></li>
                                     <li><a href="checkout.html">Checkout</a></li>
                                     <li><a href="cart.html">Cart</a></li>
@@ -128,7 +129,7 @@
                             </li>
                             <li class="dropdown"><a href="#">Blog<i class="fa fa-angle-down"></i></a>
                                 <ul role="menu" class="sub-menu">
-                                    <li><a href="{{ url('/frontend/blog') }}">Blog List</a></li>
+                                    <li><a href="{{ url('/blog') }}">Blog List</a></li>
                                     <li><a href="blog-single.html">Blog Single</a></li>
                                 </ul>
                             </li>
@@ -139,7 +140,23 @@
                 </div>
                 <div class="col-sm-3">
                     <div class="search_box pull-right">
-                        <input type="text" placeholder="Search" />
+                        <form action="{{ url('/frontend/search') }}" method="POST">
+                            @csrf
+                            <input id="search" style="width: 200px" type="text" name="search" placeholder="Enter name product..." />
+                            <button id="submit_search" type="submit" name="submit" style="height: 35px" class="button">Search</button>
+                        </form>
+                        
+                        @if($errors->any())
+                            <div class="alert alert-danger alert-dismissible">
+                                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+                                <h4><i class="icon fa fa-check"></i> Thông báo!</h4>
+                                <ul>
+                                    @foreach($errors->all() as $error)
+                                    <li>{{$error}}</li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        @endif
                     </div>
                 </div>
             </div>
@@ -147,3 +164,4 @@
     </div>
     <!--/header-bottom-->
 </header>
+

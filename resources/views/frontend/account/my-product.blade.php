@@ -14,14 +14,22 @@
 
 		<tbody>
 			@if (!empty($data))
+			@php
+				$count = 0;
+			@endphp
 			@foreach ($data as $item)
-			<tr>
-				<td class="cart_product" style="width: 110px;">
-					<a href=""><img src="" alt=""></a>
+			<tr style="border-bottom: 1px solid #ccc"> 
+				<td class="cart_product" style="width: 130PX;">
+					<a href="#">
+						<img src="{{ asset('frontend/images/product/' . $data_img[$count]) }}" alt="">
+						@php
+							$count++
+						@endphp
+					</a>
 				</td>
-				<td class="cart_description">
+				<td class="cart_description" style="width: 65%">
 					<h4><a href="">
-							{{ $item['name'] }}
+							{{ $item->name }}
 						</a>
 					</h4>
 					<p>Product ID:
@@ -34,7 +42,7 @@
 					</p>
 				</td>
 				<td class="cart_delete is-flex">
-					<a href="" class="cart_quantity_edit">
+					<a href="{{ url('/frontend/account/my-product/edit/' . $item->id) }}" class="cart_quantity_edit">
 						<span class="material-icons material-icons-outlined">
 							edit
 						</span>

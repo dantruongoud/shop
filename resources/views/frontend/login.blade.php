@@ -18,7 +18,7 @@
 						</span>
 						<div id="buttons">
 							<button type="submit" name="submit" class="btn btn-default">Login</button>
-							<a href="{{ url('/register') }}" type="submit" name="submit"
+							<a href="{{ url('/frontend/register') }}"
 								class="btn btn-default">Register</a>
 						</div>
 						@if($errors->any())

@@ -53,7 +53,7 @@ class MemberController extends Controller
 
 
         if (Auth::attempt($login)) {
-            return redirect('/frontend/index');
+            return redirect('/index');
         } else {
             return redirect()->back()->withErrors('Email or password is not correct...');
         }

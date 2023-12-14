@@ -87,7 +87,8 @@
     <h2>{{ count($data_cmt) }} RESPONSES</h2>
     <ul class="media-list">
         @foreach ($data_cmt as $cmt)
-
+        
+        @if ($cmt->level == 0)
         <li class="media">
             <a class="pull-left" href="#">
                 <img class="media-object" src="{{ asset('frontend/images/user-avatr/' . $user_info['avatar']) }}"
@@ -100,33 +101,33 @@
                     <li><i class="fa fa-calendar"></i> {{ $cmt['created_at']->format('M d, Y') }}</li>
                 </ul>
                 <p>{{ $cmt['comment'] }}</p>
-                <a class="btn btn-primary reply-btn" data-level="{{ $cmt->level }}" data-id="{{ $cmt->id }}" href="#">
+                <a class="btn btn-primary reply-btn" data-level="{{ $cmt->id }}">
                     <i class="fa fa-reply"></i>Reply
                 </a>
             </div>
         </li>
-
-        @if ($cmt->level == $cmt->id)
-        <li class="media second-media">
-            <a class="pull-left" href="#">
-                <img class="media-object" src="images/blog/man-three.jpg" alt="">
-            </a>
-            <div class="media-body">
-                <ul class="sinlge-post-meta">
-                    <li><i class="fa fa-user"></i>Janis Gallagher</li>
-                    <li><i class="fa fa-clock-o"></i> 1:33 pm</li>
-                    <li><i class="fa fa-calendar"></i> DEC 5, 2013</li>
-                </ul>
-                <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor
-                    incididunt ut labore
-                    et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation
-                    ullamco laboris nisi ut
-                    aliquip ex ea commodo consequat.</p>
-                <a class="btn btn-primary" href=""><i class="fa fa-reply"></i>Replay</a>
-            </div>
-        </li>
+            
         @endif
-
+        
+        @foreach ($data_cmt as $reply)
+        @if ($reply->level == $cmt->id)
+            <li class="media second-media">
+                <a class="pull-left" href="#">
+                    <img class="media-object" src="{{ asset('frontend/images/user-avatr/' . $user_info['avatar']) }}" alt="">
+                </a>
+                <div class="media-body">
+                    <ul class="sinlge-post-meta">
+                        <li><i class="fa fa-user"></i>{{ $user_info['name'] }}</li>
+                        <li><i class="fa fa-clock-o"></i> {{ $reply->created_at->format('g:i A') }} </li>
+                        <li><i class="fa fa-calendar"></i> {{ $reply->created_at->format('M d, Y') }}</li>
+                    </ul>
+                    <p>{{ $reply->comment }}</p>
+                    <a class="btn btn-primary"><i class="fa fa-reply"></i>Replay</a>
+                </div>
+            </li>
+        @endif
+        @endforeach
+        
         @endforeach
 
     </ul>
@@ -143,13 +144,16 @@
                 </div>
                 <span>*</span>
                 <input type="hidden" name="level">
-                <input type="hidden" name="reply_id">
-                <div class="reply-content">{{ }}</div>
                 <textarea id="replyTextarea" style=" min-height: 10em" name="comment" class="textarea is-warning"
-                    placeholder="Enter anything do you want..."></textarea>
+                placeholder="Enter anything do you want..."></textarea>
 
-                <button id="post_cmt" name="submit" type="submit" class="btn btn-primary" href="">Post
-                    Comment</button>
+                <div style="height: 40px" class="reply-content">
+                    <p>
+                        {{ $cmt->content }}
+                    </p>
+                </div>
+
+                <button id="post_cmt" name="submit" type="submit" class="btn btn-primary" href="">Post Comment</button>
             </div>
         </div>
     </div>
@@ -162,6 +166,13 @@
             headers: {
             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')}
         });
+        
+
+        if ($('input[name="level"]').val()) {
+            $('.reply-content').show();
+        } else {
+            $('.reply-content').hide();
+        }
                 //vote
         $('.ratings_stars').hover(
             // Handles the mouseover
@@ -214,18 +225,37 @@
                 if (commentValue == "") {
                     alert('Please enter your comment');
                 } else {
-                    $.ajax({
+
+                    if ($('input[name="level"]').val()) {
+                        var getValue = $('input[name="level"]').val().trim();
+                        $.ajax({
                         method: "POST",
                         url: "{{ url('/frontend/blog/blog-detail/comment') }}",
                         data: {
                             comment: commentValue,
                             id_blog: "{{ $data->id }}",
-                            id_user: "{{ Auth::id() }}"
+                            id_user: "{{ Auth::id() }}",
+                            level: getValue
                         },
                         success : function(res){
                             comment.val('');
                         }
                     });
+                    } else {
+                        $.ajax({
+                            method: "POST",
+                            url: "{{ url('/frontend/blog/blog-detail/comment') }}",
+                            data: {
+                                comment: commentValue,
+                                id_blog: "{{ $data->id }}",
+                                id_user: "{{ Auth::id() }}",
+                                level: 0
+                            },
+                            success : function(res){
+                                comment.val('');
+                            }
+                        });
+                    }
                 }
             } else {
                 alert('Please login to website');
@@ -235,17 +265,37 @@
         $('.reply-btn').click(function(){
             var replyContent = $(this).closest('.media-body').find('p').text();
             var level = $(this).data('level');
-            var replyId = $(this).data('id');
 
             // Hiển thị nội dung đang reply trong textarea
-            $('#replyTextarea').val(replyContent);
+            $('div.reply-content > p').text(replyContent);
 
             // Lưu level và id của comment đang reply vào hidden input
             $('input[name="level"]').val(level);
-            $('input[name="reply_id"]').val(replyId);
+
+            $('.reply-content').show();
 
             // Cuộn xuống textarea
-            $('#replyTextarea').focus();
+            $('html, body').animate({
+                scrollTop: $('#replyTextarea').offset().top
+            }, 900);
+
+            
+            // var comment = $('textarea[name="comment"]');
+            // var commentValue = comment.val();
+
+            // $.ajax({
+            //     method: "POST",
+            //     url: "{{ url('/frontend/blog/blog-detail/reply') }}",
+            //     data: {
+            //         comment: commentValue,
+            //         id_blog: "{{ $data->id }}",
+            //         id_user: "{{ Auth::id() }}",
+            //         level: level,
+            //     },
+            //     success : function(res){
+            //         comment.val(res);
+            //     }
+            // });
         });
     });
 </script>

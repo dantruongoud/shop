@@ -6,12 +6,12 @@
 
         <div class="panel panel-default">
             <div class="panel-heading">
-                <h4 class="panel-title"><a href="{{ url('frontend/account/my-account') }}">account</a></h4>
+                <h4 class="panel-title"><a href="{{ url('account/my-account') }}">account</a></h4>
             </div>
         </div>
         <div class="panel panel-default">
             <div class="panel-heading">
-                <h4 class="panel-title"><a href="{{ url('/frontend/account/my-product') }}">My product</a></h4>
+                <h4 class="panel-title"><a href="{{ url('/account/my-product') }}">My product</a></h4>
             </div>
         </div>
 

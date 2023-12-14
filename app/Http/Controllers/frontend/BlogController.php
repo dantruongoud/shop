@@ -11,7 +11,6 @@ use App\Models\Rate;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Symfony\Component\Console\Input\Input;
 
 class BlogController extends Controller
 {
@@ -36,7 +35,7 @@ class BlogController extends Controller
         $sum_rate = Rate::where('id_blog', $id)->count();
 
         // Xử lý dữ liệu comment
-        $data_cmt = Comments::where('id_blog', $id)->orderBy('id', 'asc')->get();
+        $data_cmt = Comments::where('id_blog', $id)->orderBy('id', 'desc')->get();
 
         // Xử lý dữ liệu user theo comment
         $data_id_user = Comments::select('id_user')->first();
@@ -65,12 +64,7 @@ class BlogController extends Controller
     public function comment(CommentRequest $request)
     {
         $data = $request->all();
-        $data['level'] = 0;
+
         Comments::create($data);
-    }
-
-    public function reply($id)
-    {
-
     }
 }

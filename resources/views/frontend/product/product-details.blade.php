@@ -1,11 +1,12 @@
-@extends('frontend.layouts.layout_account')
+@extends('frontend.layouts.layout_blog')
 @section('content')
 <div class="product-details">
     <!--product-details-->
     <div class="col-sm-5">
         <div class="view-product">
-            <img src="{{ asset('frontend/images/product-details/1.jpg') }}" alt="" />
-            <a href="{{ asset('frontend/images/product-details/1.jpg') }}" rel="prettyPhoto">
+
+            <img id="show_image" src="{{ asset('frontend/images/product/' . $img[0]) }}" alt="" />
+            <a href="" rel="prettyPhoto">
                 <h3>ZOOM</h3>
             </a>
 
@@ -15,19 +16,19 @@
             <!-- Wrapper for slides -->
             <div class="carousel-inner">
                 <div class="item active">
-                    <a href=""><img src="{{ asset('frontend/images/product-details/similar1.jpg') }}" alt=""></a>
-                    <a href=""><img src="{{ asset('frontend/images/product-details/similar2.jpg') }}" alt=""></a>
-                    <a href=""><img src="{{ asset('frontend/images/product-details/similar3.jpg') }}" alt=""></a>
+                    @foreach ($img as $item)
+                    <a><img id="{{ $item }}" src="{{ asset('frontend/images/product/2' . $item) }}" alt=""></a>
+                    @endforeach
                 </div>
                 <div class="item">
-                    <a href=""><img src="{{ asset('frontend/images/product-details/similar1.jpg') }}" alt=""></a>
-                    <a href=""><img src="{{ asset('frontend/images/product-details/similar2.jpg') }}" alt=""></a>
-                    <a href=""><img src="{{ asset('frontend/images/product-details/similar3.jpg') }}" alt=""></a>
+                    @foreach ($img as $item)
+                    <a><img id="{{ $item }}" src="{{ asset('frontend/images/product/2' . $item) }}" alt=""></a>
+                    @endforeach
                 </div>
                 <div class="item">
-                    <a href=""><img src="{{ asset('frontend/images/product-details/similar1.jpg') }}" alt=""></a>
-                    <a href=""><img src="{{ asset('frontend/images/product-details/similar2.jpg') }}" alt=""></a>
-                    <a href=""><img src="{{ asset('frontend/images/product-details/similar3.jpg') }}" alt=""></a>
+                    @foreach ($img as $item)
+                    <a><img id="{{ $item }}" src="{{ asset('frontend/images/product/2' . $item) }}" alt=""></a>
+                    @endforeach
                 </div>
 
             </div>
@@ -45,22 +46,38 @@
     <div class="col-sm-7">
         <div class="product-information">
             <!--/product-information-->
-            <img src="{{ asset('frontend/images/product-details/new.jpg') }}" class="newarrival" alt="" />
-            <h2>Anne Klein Sleeveless Colorblock Scuba</h2>
-            <p>Web ID: 1089772</p>
+
+            @if ($data->sale == 0)
+                <img src="{{ asset('frontend/images/product-details/new.jpg') }}" class="newarrival" alt="" />
+            @endif
+
+            <h2>{{ $data->name }}</h2>
+            <p>Product ID: {{ $data->id }}</p>
             <img src="{{ asset('frontend/images/product-details/rating.png') }}" alt="" />
-            <span>
-                <span>US $59</span>
+            <span>  
+                <span>US ${{ $data->price }}</span>
                 <label>Quantity:</label>
-                <input type="text" value="3" />
-                <button type="button" class="btn btn-fefault cart">
+                <input id="value_cart" type="number" value="0" />
+                <button id="add_cart" type="button" name="submit" class="btn btn-fefault cart">
                     <i class="fa fa-shopping-cart"></i>
                     Add to cart
                 </button>
             </span>
             <p><b>Availability:</b> In Stock</p>
-            <p><b>Condition:</b> New</p>
-            <p><b>Brand:</b> E-SHOPPER</p>
+            <p><b>Condition:</b> 
+                @if ($data->sale == 0)
+                    New 
+                @else
+                    Sale {{ $data['sale-value'] }} %
+                @endif
+            </p>
+            <p><b>Brand:</b> 
+                @foreach ($brands as $brand)
+                    @if ($brand->id == $data->brand)
+                        {{ $brand->name }}
+                    @endif
+                @endforeach
+            </p>
             <a href=""><img src="{{ asset('frontend/images/product-details/share.png') }}" class="share img-responsive"
                     alt="" /></a>
         </div>
@@ -373,5 +390,50 @@
         </a>
     </div>
 </div>
+
+
+<script>
+    $(document).ready(function () {
+        $.ajaxSetup({
+            headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')}
+        });
+        
+        $('#similar-product div.item > a > img').click(function (e) { 
+            e.preventDefault();
+            
+            var value = $(this).attr('id').trim();
+            
+            $('#show_image').attr('src', '{{ asset("frontend/images/product/") }}/' + value);
+            
+            // Cập nhật thẻ src của thẻ a để zoom
+            var currentImagePath = $('#show_image').attr('src');
+            $('#show_image').next('a').attr('href', currentImagePath);
+        });
+
+        $('#add_cart').click(function (e) { 
+            e.preventDefault();
+            
+            var qty = $('#value_cart').val();
+            if (qty <= 0) {
+                alert('Please choose quantity do you want...');
+            } else {
+                $.ajax({
+                    method: "POST",
+                    url: "{{ url('/frontend/product/product-detail/add_cart') }}",
+                    data: {
+                        id_product: "{{ $data->id }}",
+                        qty: qty,
+                        id_user: "{{ Auth::id() }}"
+                    },
+                    success: function (res) {
+                        console.log(res);
+        				$('a#sum_qty').text("Cart (" + res.sum + ")");
+                    }
+                });
+            }
+        });
+    });
+</script>
 <!--/recommended_items-->
 @endsection
